@@ -1,8 +1,8 @@
-VALID_CHOICES = %w(r p sc l sp).freeze
-
-VALID_VALUES =  %w(rock paper scissors lizard spock).freeze
-
-CHOICES_TO_VALUES = VALID_CHOICES.zip(VALID_VALUES).to_h.freeze
+CHOICES_TO_VALUES = { 'r' => 'rock',
+                      'p' => 'paper',
+                      'sc' => 'scissors',
+                      'l' => 'lizard',
+                      's' => 'spock' }.freeze
 
 RESULTS = { 'rock' => %w(lizard scissors),
             'paper' => %w(rock spock),
@@ -17,7 +17,7 @@ end
 def display_choices
   formatted_choices = CHOICES_TO_VALUES.map do |choice, value|
     "#{choice} => #{value}"
-  end
+  end.join(', ')
 
   prompt(formatted_choices)
 end
@@ -36,7 +36,7 @@ def display_results(user_choice, computer_choice)
   end
 end
 
-prompt "Welcome to #{VALID_VALUES.map(&:upcase).join(', ')}!"
+prompt "Welcome to #{CHOICES_TO_VALUES.values.map(&:upcase).join(', ')}!"
 
 loop do
   user_score = 0
@@ -50,12 +50,12 @@ loop do
 
     loop do
       user_choice = gets.chomp
-      break if VALID_CHOICES.include? user_choice
+      break if CHOICES_TO_VALUES.keys.include? user_choice
       puts 'Not a valid choice...'
     end
     user_choice = CHOICES_TO_VALUES[user_choice]
 
-    computer_choice = VALID_VALUES.sample
+    computer_choice = CHOICES_TO_VALUES.values.sample
 
     prompt "You chose: #{user_choice}; computer chose: #{computer_choice}"
 
