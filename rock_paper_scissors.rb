@@ -1,50 +1,76 @@
-VALID_CHOICES = %w(rock paper scissors).freeze
+VALID_CHOICES = %w(r p sc l sp).freeze
 
-RESULTS = { 'rock' => { 'scissors' => 1,
-                        'paper' => -1,
-                        'rock' => 0 },
-            'paper' => { 'rock' => 1,
-                         'scissors' => -1,
-                         'paper' => 0 },
-            'scissors' => { 'paper' => 1,
-                            'rock' => -1,
-                            'scissors' => 0 } }.freeze
+VALID_VALUES =  %w(rock paper scissors lizard spock).freeze
+
+CHOICES_TO_VALUES = VALID_CHOICES.zip(VALID_VALUES).to_h.freeze
+
+RESULTS = { 'rock' => %w(lizard scissors),
+            'paper' => %w(rock spock),
+            'scissors' => %w(paper lizard),
+            'lizard' => %w(spock paper),
+            'spock' => %w(scissors rock) }.freeze
 
 def prompt(message)
   puts ">> #{message}"
 end
 
+def display_choices
+  formatted_choices = CHOICES_TO_VALUES.map do |choice, value|
+    "#{choice} => #{value}"
+  end
+
+  prompt(formatted_choices)
+end
+
+def win?(first_choice, second_choice)
+  RESULTS[first_choice].include? second_choice
+end
+
 def display_results(user_choice, computer_choice)
-  if RESULTS[user_choice][computer_choice] == 1
+  if win?(user_choice, computer_choice)
     prompt 'You won!'
-  elsif RESULTS[user_choice][computer_choice] == -1
+  elsif win?(computer_choice, user_choice)
     prompt 'You lost...'
   else
     prompt 'You tied.'
   end
 end
 
-prompt "Welcome to #{VALID_CHOICES.map(&:upcase).join(', ')}!"
+prompt "Welcome to #{VALID_VALUES.map(&:upcase).join(', ')}!"
 
 loop do
-  prompt "Please make a choice: #{VALID_CHOICES.join(', ')}"
+  user_score = 0
+  computer_score = 0
 
-  user_choice = ''
   loop do
-    user_choice = gets.chomp
-    break if VALID_CHOICES.include? user_choice
-    puts 'Not a valid choice...'
+    prompt 'Please make a choice:'
+    display_choices
+
+    user_choice = ''
+
+    loop do
+      user_choice = gets.chomp
+      break if VALID_CHOICES.include? user_choice
+      puts 'Not a valid choice...'
+    end
+    user_choice = CHOICES_TO_VALUES[user_choice]
+
+    computer_choice = VALID_VALUES.sample
+
+    prompt "You chose: #{user_choice}; computer chose: #{computer_choice}"
+
+    display_results(user_choice, computer_choice)
+    user_score += 1 if win?(user_choice, computer_choice)
+    computer_score += 1 if win?(computer_choice, user_choice)
+
+    prompt "The score is now user: #{user_score}; computer: #{computer_score}"
+    break if user_score == 5 || computer_score == 5
   end
 
-  computer_choice = VALID_CHOICES.sample
-
-  prompt "You chose: #{user_choice}; computer chose: #{computer_choice}"
-
-  display_results(user_choice, computer_choice)
+  prompt user_score == 5 ? 'You won the game!' : 'The computer won the game!'
 
   prompt 'Want to play again?'
-  answer = gets.chomp
-  break unless answer.downcase.start_with? 'y'
+  break unless gets.downcase.start_with? 'y'
 end
 
 prompt 'Thanks for playing! Goodbye!'
